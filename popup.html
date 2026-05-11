@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>transcribe-it settings</title>
+    <link rel="stylesheet" href="popup.css" />
+    <style>
+      /* Popup is fixed-width; the body provides the visible chrome. */
+      html, body { width: 360px; }
+      body { margin: 0; }
+    </style>
+  </head>
+  <body class="bg-background text-foreground">
+    <main class="p-4 space-y-4">
+      <header>
+        <h1 class="text-base font-semibold">transcribe-it</h1>
+        <p class="text-xs text-muted-foreground">Settings</p>
+      </header>
+
+      <section class="space-y-3">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <label for="toggle-up-to" class="text-sm font-medium">Copy only up to current time</label>
+            <p class="text-xs text-muted-foreground">Stops at the video's current playback position.</p>
+          </div>
+          <button
+            id="toggle-up-to"
+            type="button"
+            role="switch"
+            aria-checked="false"
+            class="switch-root"
+            data-state="unchecked"
+          >
+            <span class="switch-thumb"></span>
+          </button>
+        </div>
+
+        <div class="flex items-start justify-between gap-3">
+          <label for="toggle-prepend" class="text-sm font-medium">Prepend prompt to clipboard</label>
+          <button
+            id="toggle-prepend"
+            type="button"
+            role="switch"
+            aria-checked="true"
+            class="switch-root"
+            data-state="checked"
+          >
+            <span class="switch-thumb"></span>
+          </button>
+        </div>
+      </section>
+
+      <section class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label for="prompt-text" class="text-sm font-medium">Prompt</label>
+          <button
+            id="reset-btn"
+            type="button"
+            class="text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+          >
+            Reset to default
+          </button>
+        </div>
+        <textarea
+          id="prompt-text"
+          rows="10"
+          class="w-full rounded-md border border-input bg-card text-card-foreground p-2 text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-ring resize-y"
+          spellcheck="false"
+        ></textarea>
+      </section>
+
+      <p
+        id="saved-indicator"
+        class="text-xs text-muted-foreground opacity-0 transition-opacity"
+        aria-live="polite"
+      >
+        Saved
+      </p>
+    </main>
+
+    <dialog
+      id="reset-dialog"
+      class="rounded-lg border border-border bg-popover text-popover-foreground p-0 backdrop:bg-black/40 max-w-xs"
+    >
+      <form method="dialog" class="p-4 space-y-3">
+        <h2 class="text-sm font-semibold">Reset prompt to default?</h2>
+        <p class="text-xs text-muted-foreground">
+          This will replace the current prompt text. This action cannot be undone.
+        </p>
+        <div class="flex justify-end gap-2">
+          <button
+            value="cancel"
+            class="px-3 py-1.5 text-xs rounded-md border border-input hover:bg-secondary"
+          >
+            Cancel
+          </button>
+          <button
+            value="confirm"
+            class="px-3 py-1.5 text-xs rounded-md bg-destructive text-destructive-foreground hover:opacity-90"
+          >
+            Reset
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="defaults.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

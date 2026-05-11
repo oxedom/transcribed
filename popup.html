@@ -19,10 +19,7 @@
 
       <section class="space-y-3">
         <div class="flex items-start justify-between gap-3">
-          <div>
-            <label for="toggle-up-to" class="text-sm font-medium">Copy only up to current time</label>
-            <p class="text-xs text-muted-foreground">Stops at the video's current playback position.</p>
-          </div>
+          <label for="toggle-up-to" class="text-sm font-medium">Copy only up to current time</label>
           <button
             id="toggle-up-to"
             type="button"
@@ -69,13 +66,23 @@
         ></textarea>
       </section>
 
-      <p
-        id="saved-indicator"
-        class="text-xs text-muted-foreground opacity-0 transition-opacity"
-        aria-live="polite"
-      >
-        Saved
-      </p>
+      <div class="flex items-center justify-between gap-3">
+        <p
+          id="saved-indicator"
+          class="text-xs text-muted-foreground opacity-0 transition-opacity"
+          aria-live="polite"
+        >
+          Saved
+        </p>
+        <button
+          id="save-btn"
+          type="button"
+          disabled
+          class="px-3 py-1.5 text-xs rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Save
+        </button>
+      </div>
     </main>
 
     <dialog

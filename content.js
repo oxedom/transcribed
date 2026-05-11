@@ -6,13 +6,15 @@
     #${BTN_ID} {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      background: #0F4D49;
+      background: #C2761F;
       color: #ffffff;
-      border: none;
+      border: 1px solid #0F4D49;
       border-radius: 18px;
       padding: 0 14px;
       height: 36px;
+      min-width: 180px;
       font-family: "Roboto", "Arial", sans-serif;
       font-size: 14px;
       font-weight: 500;
@@ -21,18 +23,26 @@
       transition: background 0.15s ease;
       white-space: nowrap;
     }
-    #${BTN_ID}:hover { background: #14625C; }
-    #${BTN_ID}:active { background: #0A3835; }
-    #${BTN_ID}[disabled] { opacity: 0.7; cursor: default; }
+    #${BTN_ID}:hover { background: #D08731; }
+    #${BTN_ID}:active { background: #A66419; }
+    #${BTN_ID}[disabled] { opacity: 0.8; cursor: default; }
     #${BTN_ID} svg { width: 20px; height: 20px; display: block; }
+    @keyframes yt-transcribe-spin { to { transform: rotate(360deg); } }
+    #${BTN_ID} .yt-transcribe-spinner { animation: yt-transcribe-spin 0.9s linear infinite; }
   `;
 
   const ICON_SVG = `
     <svg viewBox="0 0 100 100" aria-hidden="true">
-      <g stroke="#C2761F" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <g stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
         <path d="M 19 57 L 19 21 A 8 8 0 0 1 27 13 L 56 13"/>
         <rect x="31" y="22" width="50" height="70" rx="8"/>
       </g>
+    </svg>
+  `;
+
+  const SPINNER_SVG = `
+    <svg class="yt-transcribe-spinner" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="#ffffff" stroke-width="3" fill="none" stroke-dasharray="42 18" stroke-linecap="round"/>
     </svg>
   `;
 
@@ -140,35 +150,28 @@
     }
   }
 
-  function buildSuccessLabel(count, lastTs, settings) {
-    const parts = [`Copied ${count} lines`];
-    if (settings.prependPrompt && settings.promptText.trim()) parts.push("+ prompt");
-    if (settings.copyUpToCurrentTime && lastTs) parts.push(`(up to ${lastTs})`);
-    return parts.join(" ");
-  }
-
   async function copyTranscript(btn) {
     const original = btn.innerHTML;
     const setLabel = (html) => { btn.innerHTML = html; };
     btn.disabled = true;
-    setLabel(`${ICON_SVG}<span>Loading…</span>`);
+    setLabel(`${SPINNER_SVG}<span>Copying…</span>`);
 
     try {
       const settings = await loadSettings();
 
       const panel = await ensureTranscriptOpen();
-      if (!panel) throw new Error("No transcript available for this video.");
+      if (!panel) throw new Error("No transcript available");
 
       const segs = await waitFor(() => {
         const s = getSegments();
         return s.length ? s : null;
       }, { timeout: 10000 });
-      if (!segs) throw new Error("No transcript available for this video.");
+      if (!segs) throw new Error("No transcript available");
 
       const video = document.querySelector("video");
       const currentTime = settings.copyUpToCurrentTime && video ? video.currentTime : 0;
       const items = filterSegmentsByTime(segs, currentTime);
-      if (!items.length) throw new Error("Transcript is empty.");
+      if (!items.length) throw new Error("Transcript is empty");
 
       const body = formatTranscript(items);
       const trimmedPrompt = settings.promptText.trim();
@@ -178,8 +181,7 @@
 
       await navigator.clipboard.writeText(out);
 
-      const lastTs = settings.copyUpToCurrentTime ? items[items.length - 1].ts : "";
-      setLabel(`${ICON_SVG}<span>${buildSuccessLabel(items.length, lastTs, settings)}</span>`);
+      setLabel(`${ICON_SVG}<span>Copied</span>`);
     } catch (e) {
       console.error("[transcribe-it]", e);
       setLabel(`${ICON_SVG}<span>${e.message || "Failed"}</span>`);

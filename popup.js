@@ -8,8 +8,11 @@ const els = {
   promptText: document.getElementById("prompt-text"),
   resetBtn: document.getElementById("reset-btn"),
   resetDialog: document.getElementById("reset-dialog"),
+  saveBtn: document.getElementById("save-btn"),
   savedIndicator: document.getElementById("saved-indicator"),
 };
+
+let lastSaved = null;
 
 function applyTheme() {
   const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -39,6 +42,18 @@ function currentSettings() {
   };
 }
 
+function settingsEqual(a, b) {
+  return (
+    a.copyUpToCurrentTime === b.copyUpToCurrentTime &&
+    a.prependPrompt === b.prependPrompt &&
+    a.promptText === b.promptText
+  );
+}
+
+function refreshSaveButton() {
+  els.saveBtn.disabled = settingsEqual(currentSettings(), lastSaved);
+}
+
 let savedTimeout = null;
 function flashSaved() {
   els.savedIndicator.style.opacity = "1";
@@ -49,7 +64,10 @@ function flashSaved() {
 }
 
 async function save() {
-  await chrome.storage.sync.set({ [SETTINGS_KEY]: currentSettings() });
+  const next = currentSettings();
+  await chrome.storage.sync.set({ [SETTINGS_KEY]: next });
+  lastSaved = next;
+  refreshSaveButton();
   flashSaved();
 }
 
@@ -60,27 +78,27 @@ async function init() {
   const stored = await chrome.storage.sync.get(SETTINGS_KEY);
   const settings = { ...DEFAULT_SETTINGS, ...(stored[SETTINGS_KEY] || {}) };
   render(settings);
+  lastSaved = settings;
+  refreshSaveButton();
 
   for (const sw of [els.toggleUpTo, els.togglePrepend]) {
     sw.addEventListener("click", () => {
       setSwitch(sw, !readSwitch(sw));
-      save();
+      refreshSaveButton();
     });
   }
 
-  let saveTimer = null;
-  els.promptText.addEventListener("input", () => {
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(save, 500);
-  });
+  els.promptText.addEventListener("input", refreshSaveButton);
 
   els.resetBtn.addEventListener("click", () => els.resetDialog.showModal());
   els.resetDialog.addEventListener("close", () => {
     if (els.resetDialog.returnValue === "confirm") {
       els.promptText.value = DEFAULT_SETTINGS.promptText;
-      save();
+      refreshSaveButton();
     }
   });
+
+  els.saveBtn.addEventListener("click", save);
 }
 
 init();

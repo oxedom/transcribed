@@ -153,7 +153,7 @@ After a successful copy, the in-page button briefly shows a label reflecting wha
 | on | off | `Copied N lines (up to M:SS)` |
 | on | on | `Copied N lines + prompt (up to M:SS)` |
 
-`M:SS` formats `currentTime` using existing YouTube-style formatting (reuse one of the segment timestamps as a reference, or format inline).
+The timestamp shown is the timestamp string of the last included segment (e.g. `1:23` or `1:23:45`) — already in YouTube's native format, no separate formatting needed.
 
 ## Manifest
 

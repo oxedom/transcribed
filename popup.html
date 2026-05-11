@@ -66,23 +66,15 @@
         ></textarea>
       </section>
 
-      <div class="flex items-center justify-between gap-3">
-        <p
-          id="saved-indicator"
-          class="text-xs text-muted-foreground opacity-0 transition-opacity"
-          aria-live="polite"
-        >
-          Saved
-        </p>
-        <button
-          id="save-btn"
-          type="button"
-          disabled
-          class="px-3 py-1.5 text-xs rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          Save
-        </button>
-      </div>
+      <button
+        id="save-btn"
+        type="button"
+        disabled
+        aria-live="polite"
+        class="w-full px-3 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+      >
+        Save
+      </button>
     </main>
 
     <dialog

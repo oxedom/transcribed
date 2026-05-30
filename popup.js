@@ -9,6 +9,8 @@
     resetBtn: document.getElementById("reset-btn"),
     resetDialog: document.getElementById("reset-dialog"),
     saveBtn: document.getElementById("save-btn"),
+    toggleOpenChat: document.getElementById("toggle-open-chat"),
+    chatTarget: document.getElementById("chat-target"),
   };
 
   let lastSaved = null;
@@ -28,22 +30,33 @@
     return el.dataset.state === "checked";
   }
 
+  function syncChatTargetVisibility() {
+    els.chatTarget.hidden = !readSwitch(els.toggleOpenChat);
+  }
+
   function render(settings) {
     setSwitch(els.togglePrepend, settings.prependPrompt);
     els.promptText.value = settings.promptText;
+    setSwitch(els.toggleOpenChat, settings.openChatAfterCopy);
+    els.chatTarget.value = settings.chatTarget;
+    syncChatTargetVisibility();
   }
 
   function currentSettings() {
     return {
       prependPrompt: readSwitch(els.togglePrepend),
       promptText: els.promptText.value,
+      openChatAfterCopy: readSwitch(els.toggleOpenChat),
+      chatTarget: els.chatTarget.value,
     };
   }
 
   function settingsEqual(a, b) {
     return (
       a.prependPrompt === b.prependPrompt &&
-      a.promptText === b.promptText
+      a.promptText === b.promptText &&
+      a.openChatAfterCopy === b.openChatAfterCopy &&
+      a.chatTarget === b.chatTarget
     );
   }
 
@@ -81,6 +94,14 @@
       setSwitch(els.togglePrepend, !readSwitch(els.togglePrepend));
       refreshSaveButton();
     });
+
+    els.toggleOpenChat.addEventListener("click", () => {
+      setSwitch(els.toggleOpenChat, !readSwitch(els.toggleOpenChat));
+      syncChatTargetVisibility();
+      refreshSaveButton();
+    });
+
+    els.chatTarget.addEventListener("change", refreshSaveButton);
 
     els.promptText.addEventListener("input", refreshSaveButton);
 

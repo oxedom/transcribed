@@ -24,13 +24,23 @@ Content:
     Ask before starting if the source is unusually long, low-signal, or ambiguous in scope
     Output the HTML as a file I can save, not inline in chat`;
 
+// Ordered map of AI chat destinations. Keys are stored in settings;
+// labels + urls are shared by the popup (dropdown) and content script (tab open).
+const CHAT_TARGETS = {
+  chatgpt: { label: "ChatGPT", url: "https://chatgpt.com" },
+  claude:  { label: "Claude",  url: "https://claude.ai" },
+  gemini:  { label: "Gemini",  url: "https://gemini.google.com" },
+};
+
 const DEFAULT_SETTINGS = {
   prependPrompt: true,
   promptText: DEFAULT_PROMPT,
+  openChatAfterCopy: false,
+  chatTarget: "chatgpt",
 };
 
 const SETTINGS_KEY = "transcribedSettings";
 
 // Expose on globalThis so both content-script and popup contexts can read them
 // without an ES module loader.
-globalThis.TranscribedDefaults = { DEFAULT_PROMPT, DEFAULT_SETTINGS, SETTINGS_KEY };
+globalThis.TranscribedDefaults = { DEFAULT_PROMPT, DEFAULT_SETTINGS, SETTINGS_KEY, CHAT_TARGETS };

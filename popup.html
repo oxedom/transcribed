@@ -57,6 +57,31 @@
         ></textarea>
       </section>
 
+      <section class="space-y-3">
+        <div class="flex items-start justify-between gap-3">
+          <label for="toggle-open-chat" class="text-sm font-medium">Open AI chat after copy</label>
+          <button
+            id="toggle-open-chat"
+            type="button"
+            role="switch"
+            aria-checked="false"
+            class="switch-root"
+            data-state="unchecked"
+          >
+            <span class="switch-thumb"></span>
+          </button>
+        </div>
+        <select
+          id="chat-target"
+          hidden
+          class="w-full rounded-md border border-input bg-card text-card-foreground p-2 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="chatgpt">ChatGPT</option>
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+        </select>
+      </section>
+
       <button
         id="save-btn"
         type="button"

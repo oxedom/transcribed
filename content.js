@@ -1,6 +1,6 @@
 (() => {
   const BTN_ID = "yt-transcribe-copy-btn";
-  const { DEFAULT_SETTINGS, SETTINGS_KEY } = globalThis.TranscribedDefaults;
+  const { DEFAULT_SETTINGS, SETTINGS_KEY, CHAT_TARGETS } = globalThis.TranscribedDefaults;
 
   const STYLE = `
     #${BTN_ID} {
@@ -170,6 +170,11 @@
         : body;
 
       await navigator.clipboard.writeText(out);
+
+      if (settings.openChatAfterCopy) {
+        const target = CHAT_TARGETS[settings.chatTarget];
+        if (target) window.open(target.url, "_blank", "noopener");
+      }
 
       setLabel(`${ICON_SVG}<span>Copied</span>`);
     } catch (e) {

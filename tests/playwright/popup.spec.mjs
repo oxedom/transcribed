@@ -83,3 +83,36 @@ test("transcript copy honours prependPrompt setting", async () => {
     await context.close();
   }
 });
+
+test("opens AI chat tab after copy when enabled", async () => {
+  const { context, extensionId } = await launchWithExtension();
+  try {
+    const page = await context.newPage();
+    await context.grantPermissions(["clipboard-read", "clipboard-write"], {
+      origin: "https://www.youtube.com",
+    });
+
+    await page.goto(TEST_VIDEO_URL);
+    await page.locator("#yt-transcribe-copy-btn").waitFor({ timeout: 15000 });
+
+    await setSettings(context, extensionId, {
+      prependPrompt: false,
+      promptText: "TEST_PROMPT",
+      openChatAfterCopy: true,
+      chatTarget: "claude",
+    });
+    await page.bringToFront();
+
+    const newPagePromise = context.waitForEvent("page", { timeout: 15000 });
+    await page.click("#yt-transcribe-copy-btn");
+    await expect(page.locator("#yt-transcribe-copy-btn")).toContainText(/Copied/i, {
+      timeout: 15000,
+    });
+
+    const newPage = await newPagePromise;
+    await newPage.waitForLoadState("domcontentloaded").catch(() => {});
+    expect(newPage.url()).toContain("claude.ai");
+  } finally {
+    await context.close();
+  }
+});

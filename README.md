@@ -107,6 +107,7 @@ Click the transcribed icon in the Chrome toolbar to open the settings popup:
 - **Copy only up to current time** — when on, copy stops at the video's current playback position. Default: off.
 - **Prepend prompt to clipboard** — when on, the editable prompt is placed at the top of the clipboard (followed by a blank line, then the transcript). Default: on.
 - **Prompt** — editable textarea. "Reset to default" restores the shipped prompt after a confirmation dialog.
+- **Open AI chat after copy** — when on, a successful copy also opens a new tab to your chosen AI chat — ChatGPT, Claude, or Gemini — and focuses it, leaving the YouTube tab open so you can paste right away. A dropdown to pick the destination appears when the switch is on. Default: off.
 
 Settings auto-save and sync across your Chrome installs via `chrome.storage.sync`.
 

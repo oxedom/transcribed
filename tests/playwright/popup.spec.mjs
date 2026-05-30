@@ -1,9 +1,19 @@
 import { test, expect, chromium } from "@playwright/test";
 import path from "node:path";
+import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const EXT_PATH = path.resolve(__dirname, "..", "..");
+
+// This extension has no background service worker (only content scripts + a
+// popup), so we can't discover its ID by waiting for a service worker. Chrome
+// derives an unpacked extension's ID deterministically from the absolute path:
+// sha256(path) → first 32 hex chars, each mapped 0-f → a-p.
+function unpackedExtensionId(absPath) {
+  const hex = crypto.createHash("sha256").update(absPath).digest("hex").slice(0, 32);
+  return [...hex].map((c) => String.fromCharCode(97 + parseInt(c, 16))).join("");
+}
 
 // A YouTube talk with a stable English transcript.
 // Replace if it ever becomes unavailable.
@@ -22,9 +32,7 @@ async function launchWithExtension() {
       "--no-first-run",
     ],
   });
-  const [serviceWorker] = context.serviceWorkers();
-  const sw = serviceWorker ?? (await context.waitForEvent("serviceworker"));
-  const extensionId = new URL(sw.url()).host;
+  const extensionId = unpackedExtensionId(EXT_PATH);
   return { context, extensionId };
 }
 
@@ -112,6 +120,40 @@ test("opens AI chat tab after copy when enabled", async () => {
     const newPage = await newPagePromise;
     await newPage.waitForLoadState("domcontentloaded").catch(() => {});
     expect(newPage.url()).toContain("claude.ai");
+  } finally {
+    await context.close();
+  }
+});
+
+test("popup persists open-chat switch and target", async () => {
+  const { context, extensionId } = await launchWithExtension();
+  try {
+    // Reset to a known baseline so the test is independent of order / leftover
+    // storage in the shared user-data profile.
+    await setSettings(context, extensionId, {
+      prependPrompt: true,
+      promptText: "TEST_PROMPT",
+      openChatAfterCopy: false,
+      chatTarget: "chatgpt",
+    });
+
+    const popup = await context.newPage();
+    await popup.goto(`chrome-extension://${extensionId}/popup.html`);
+
+    // Dropdown hidden while switch is off.
+    await expect(popup.locator("#chat-target")).toBeHidden();
+
+    await popup.click("#toggle-open-chat");
+    await expect(popup.locator("#chat-target")).toBeVisible();
+    await popup.selectOption("#chat-target", "gemini");
+    await popup.click("#save-btn");
+    await expect(popup.locator("#save-btn")).toContainText(/Saved/i);
+
+    const reopened = await context.newPage();
+    await reopened.goto(`chrome-extension://${extensionId}/popup.html`);
+    await expect(reopened.locator("#toggle-open-chat")).toHaveAttribute("aria-checked", "true");
+    await expect(reopened.locator("#chat-target")).toHaveValue("gemini");
+    await expect(reopened.locator("#chat-target")).toBeVisible();
   } finally {
     await context.close();
   }
